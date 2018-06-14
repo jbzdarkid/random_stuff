@@ -9,6 +9,8 @@
       178957
 """
 import sys
+import multiprocessing
+import signal
 
 PROB_BOTH_HUBS = 25
 ALL_MARKERS = (
@@ -470,19 +472,25 @@ def check_seed(base_seed):
         print("{}, {}, {}".format(base_seed, checksum(talosProgress), talosProgress["Code_Floor6"]))
         return True
 
-start_seed = 0
-max_seed = 0x7FFFFFFF
-if len(sys.argv) > 1:
-    start_seed = int(sys.argv[1])
-if len(sys.argv) > 2:
-    max_seed = max(base_seed, min(0x7FFFFFFF, int(sys.argv[2])))
+def init_worker():
+    # Ignore SIGINT (Control-C) for children
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-try:
-    while True:
-        check_seed(start_seed)
-        start_seed += 1
-        if start_seed >= max_seed:
-            print("Out of seeds")
-            break
-except KeyboardInterrupt:
-    print("Stopped while working on", start_seed)
+if __name__ == '__main__':
+    start_seed = 0
+    max_seed = 0x7FFFFFFF
+    if len(sys.argv) > 1:
+        start_seed = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        max_seed = max(base_seed, min(0x7FFFFFFF, int(sys.argv[2])))
+
+    pool = multiprocessing.Pool(8, init_worker)
+    for base_seed in range(start_seed, max_seed+1, 1000):
+      try:
+          pool.map(check_seed, range(base_seed, base_seed+1000))
+      except KeyboardInterrupt:
+          pool.terminate()
+          pool.join()
+          print("Stopped while working on", base_seed, "through", base_seed+1000)
+      except ValueError:
+          break # Thrown during shutdown
