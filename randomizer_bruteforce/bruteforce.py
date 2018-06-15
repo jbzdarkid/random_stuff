@@ -400,7 +400,7 @@ def check_seed(base_seed):
                     index = index - len(markers[openMarker][1])
                 else:
                     randMarker = markers[openMarker][1].pop(index)
-                    if i[0] == "E" and randMarker[0] != "A":
+                    if i[0] == "E" and (randMarker[0] != "A" or randMarker[1] == "*"):
                         return False
                     talosProgress[randMarker] = i
                     availableMarkers -= 1
