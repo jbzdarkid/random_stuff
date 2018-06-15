@@ -1,12 +1,6 @@
 """
     This is very specialized, I cut a lot of code for other options/modes
-    One-hub F6-seeds:
-      4705990
-      20646763
-      21579776
-      32632976
-    Future seed, when F3 star is fixed:
-      178957
+    Future seed, when F3 star is fixed: 178957
 """
 import sys
 import multiprocessing
@@ -141,6 +135,7 @@ def checksum(talosProgress):
             if isinstance(value, str):
                 value = TETRO_INDEXES[value]
         else:
+            value = -1
             print("'" + ALL_MARKERS[index] + "' does not have a value assigned to it")
         sum1 = (sum1 + value*(index + 1)) % 65536
         sum2 = (sum2 + sum1) % 65536
@@ -423,7 +418,10 @@ def check_seed(base_seed):
             if sigil[1] == "Z":
                 z_count += 1
     if l_count >= 2 and z_count >= 2:
-        print("{}, {}, {}".format(base_seed, checksum(talosProgress), talosProgress["Code_Floor6"]))
+        output = "{}, {}, {}".format(base_seed, checksum(talosProgress), talosProgress["Code_Floor6"])
+        print(output)
+        with open("output.txt", "a") as file:
+            file.write(output + "\n")
         return True
 
 
